@@ -143,8 +143,10 @@ class NereidUser(ModelSQL, ModelView):
                     me.data['firstName'], me.data['lastName']
                 )
             )
+            name = u'%s %s' % (me.data['firstName'], me.data['lastName'])
             user_id = self.create({
-                'name': u'%s %s' % (me.data['firstName'], me.data['lastName']),
+                'name': name,
+                'display_name': name,
                 'email': email.data,
                 'linkedin_auth': True,
                 'addresses': False,
