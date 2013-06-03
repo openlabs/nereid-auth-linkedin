@@ -4,38 +4,39 @@
 
     Facebook based user authentication code
 
-    :copyright: (c) 2012 by Openlabs Technologies & Consulting (P) LTD
+    :copyright: (c) 2012-2013 by Openlabs Technologies & Consulting (P) LTD
     :license: GPLv3, see LICENSE for more details.
 """
 from nereid import url_for, flash, redirect, current_app
 from nereid.globals import session, request
 from nereid.signals import login, failed_login
 from flask_oauth import OAuth
-from trytond.model import ModelSQL, ModelView, fields
-from trytond.pool import Pool
+from trytond.model import fields
+from trytond.pool import PoolMeta
 
 from .i18n import _
 
 
-class Website(ModelSQL, ModelView):
+__all__ = ['Website', 'NereidUser']
+__metaclass__ = PoolMeta
+
+
+class Website:
     """Add Linkedin settings"""
-    _name = "nereid.website"
+    __name__ = "nereid.website"
 
     linkedin_api_key = fields.Char("LinkedIn API Key")
     linkedin_api_secret = fields.Char("LinkedIn Secret Key")
 
-    def get_linkedin_oauth_client(self, site=None, 
+    def get_linkedin_oauth_client(self,
             scope='r_basicprofile,r_emailaddress',
             token='linkedin_oauth_token'):
         """Returns a instance of WebCollect
 
-        :param site: Browserecord of the website, If not specified, it will be
-                     guessed from the request context
+        :param scope: Scope of information to be fetched from linkedin
+        :param token: Token for authentication
         """
-        if site is None:
-            site = request.nereid_website
-
-        if not all([site.linkedin_api_key, site.linkedin_api_secret]):
+        if not all([self.linkedin_api_key, self.linkedin_api_secret]):
             current_app.logger.error("LinkedIn api settings are missing")
             flash(_("LinkedIn login is not available at the moment"))
             return None
@@ -46,29 +47,26 @@ class Website(ModelSQL, ModelView):
             request_token_url='/uas/oauth/requestToken',
             access_token_url='/uas/oauth/accessToken',
             authorize_url='/uas/oauth/authenticate',
-            consumer_key=site.linkedin_api_key,
-            consumer_secret=site.linkedin_api_secret,
+            consumer_key=self.linkedin_api_key,
+            consumer_secret=self.linkedin_api_secret,
             request_token_params={'scope': scope}
         )
         linkedin.tokengetter_func = lambda *a: session.get(token)
         return linkedin
 
-Website()
 
-
-class NereidUser(ModelSQL, ModelView):
+class NereidUser:
     "Nereid User"
-    _name = "nereid.user"
+    __name__ = "nereid.user"
 
     linkedin_auth = fields.Boolean('LinkedIn Auth')
 
-    def linkedin_login(self):
+    @classmethod
+    def linkedin_login(cls):
         """The URL to which a new request to authenticate to linedin begins
         Usually issues a redirect.
         """
-        website_obj = Pool().get('nereid.website')
-
-        linkedin = website_obj.get_linkedin_oauth_client()
+        linkedin = request.nereid_website.get_linkedin_oauth_client()
         if linkedin is None:
             return redirect(
                 request.referrer or url_for('nereid.website.login')
@@ -80,13 +78,12 @@ class NereidUser(ModelSQL, ModelView):
             )
         )
 
-    def linkedin_authorized_login(self):
+    @classmethod
+    def linkedin_authorized_login(cls):
         """Authorized handler to which linkedin will redirect the user to
         after the login attempt is made.
         """
-        website_obj = Pool().get('nereid.website')
-
-        linkedin = website_obj.get_linkedin_oauth_client()
+        linkedin = request.nereid_website.get_linkedin_oauth_client()
         if linkedin is None:
             return redirect(
                 request.referrer or url_for('nereid.website.login')
@@ -112,7 +109,7 @@ class NereidUser(ModelSQL, ModelView):
                 _("Access was denied to linkedin: %(reason)s",
                 reason=request.args['error_reason'])
             )
-            failed_login.send(self, form=data)
+            failed_login.send(form=data)
             return redirect(url_for('nereid.website.login'))
 
         # Write the oauth token to the session
@@ -130,11 +127,11 @@ class NereidUser(ModelSQL, ModelView):
         session.pop('linkedin_oauth_token')
 
         # Find the user
-        user_ids = self.search([
+        users = cls.search([
             ('email', '=', email.data),
             ('company', '=', request.nereid_website.company.id),
         ])
-        if not user_ids:
+        if not users:
             current_app.logger.debug(
                 "No LinkedIn user with email %s" % email.data
             )
@@ -144,7 +141,7 @@ class NereidUser(ModelSQL, ModelView):
                 )
             )
             name = u'%s %s' % (me.data['firstName'], me.data['lastName'])
-            user_id = self.create({
+            user = cls.create({
                 'name': name,
                 'display_name': name,
                 'email': email.data,
@@ -155,16 +152,15 @@ class NereidUser(ModelSQL, ModelView):
                 _('Thanks for registering with us using linkedin')
             )
         else:
-            user_id, = user_ids
+            user, = users
 
         # Add the user to session and trigger signals
-        session['user'] = user_id
-        user = self.browse(user_id)
+        session['user'] = user.id
         if not user.linkedin_auth:
-            self.write(user_id, {'linkedin_auth': True})
+            cls.write([user], {'linkedin_auth': True})
         flash(_("You are now logged in. Welcome %(name)s",
                     name=user.name))
-        login.send(self)
+        login.send()
         if request.is_xhr:
             return 'OK'
         return redirect(
@@ -172,6 +168,3 @@ class NereidUser(ModelSQL, ModelView):
                 'next', url_for('nereid.website.home')
             )
         )
-
-
-NereidUser()
