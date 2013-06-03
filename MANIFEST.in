@@ -9,6 +9,7 @@ include Makefile
 include *.xml
 include *.odt
 include *.txt
+include tryton.cfg
 include locale/*.po
 include docs/*
 include icons/*
