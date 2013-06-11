@@ -30,7 +30,7 @@ class XMLTests(Command):
     def run(self):
         import coverage
         import xmlrunner
-        cov = coverage.coverage(source=["trytond.modules.nereid_auth_linked"])
+        cov = coverage.coverage(source=["trytond.modules.nereid_auth_linkedin"])
         cov.start()
         from tests import suite
         xmlrunner.XMLTestRunner(output="xml-test-results").run(suite())
@@ -99,19 +99,19 @@ for dep in info.get('depends', []):
 requires.append('trytond >= %s.%s, < %s.%s' %
         (major_version, minor_version, major_version, minor_version + 1))
 
-setup(name='trytond_nereid_auth_linked',
+setup(name='trytond_nereid_auth_linkedin',
     version=info.get('version', '0.0.1'),
     description='Nereid User Authentication using LinkedIn',
     author='Openlabs Technologies and Consulting P Ltd.',
     url='http://openlabs.co.in/',
-    download_url="https://github.com/openlabs/nereid-auth-linked",
-    package_dir={'trytond.modules.nereid_auth_linked': '.'},
+    download_url="https://github.com/openlabs/nereid-auth-linkedin",
+    package_dir={'trytond.modules.nereid_auth_linkedin': '.'},
     packages=[
-        'trytond.modules.nereid_auth_linked',
-        'trytond.modules.nereid_auth_linked.tests',
+        'trytond.modules.nereid_auth_linkedin',
+        'trytond.modules.nereid_auth_linkedin.tests',
         ],
     package_data={
-        'trytond.modules.nereid_auth_linked': info.get('xml', []) \
+        'trytond.modules.nereid_auth_linkedin': info.get('xml', []) \
             + ['tryton.cfg'],
         },
     classifiers=[
@@ -134,7 +134,7 @@ setup(name='trytond_nereid_auth_linked',
     zip_safe=False,
     entry_points="""
     [trytond.modules]
-    nereid_auth_linked = trytond.modules.nereid_auth_linked
+    nereid_auth_linkedin = trytond.modules.nereid_auth_linkedin
     """,
     test_suite='tests',
     test_loader='trytond.test_loader:Loader',
