@@ -8,7 +8,7 @@
     :license: GPLv3, see LICENSE for more details.
 """
 from trytond.pool import Pool
-from .user import *
+from .user import Website, NereidUser
 
 
 def register():

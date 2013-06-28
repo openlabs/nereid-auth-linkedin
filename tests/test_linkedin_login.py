@@ -23,9 +23,10 @@ from trytond.tests.test_tryton import POOL, USER, DB_NAME, CONTEXT, \
 from trytond.transaction import Transaction
 from nereid.testing import NereidTestCase
 
-from trytond.pool import Pool
 
 _def = []
+
+
 def get_from_env(key):
     """
     Find a value from environ or return the default if specified
@@ -34,7 +35,7 @@ def get_from_env(key):
     """
     try:
         return os.environ[key]
-    except KeyError, error:
+    except KeyError:
         raise Exception("%s is not set in environ" % key)
 
 REQUEST_RECEIVED = None
@@ -69,9 +70,9 @@ class TestLinkedInAuth(NereidTestCase):
         "Setup"
         trytond.tests.test_tryton.install_module('nereid_auth_linkedin')
 
-        self.Country = Pool().get('country.country')
-        self.Currency = Pool().get('currency.currency')
-        self.NereidUser = Pool().get('nereid.user')
+        self.Company = POOL.get('company.company')
+        self.Currency = POOL.get('currency.currency')
+        self.NereidUser = POOL.get('nereid.user')
         self.UrlMap = POOL.get('nereid.url_map')
         self.Language = POOL.get('ir.lang')
         self.Website = POOL.get('nereid.website')
@@ -84,7 +85,7 @@ class TestLinkedInAuth(NereidTestCase):
             'code': 'USD',
             'symbol': '$',
         })
-        self.company = self.Country.create({
+        self.company = self.Company.create({
             'name': 'Openlabs',
             'currency': usd.id
         })
@@ -104,7 +105,7 @@ class TestLinkedInAuth(NereidTestCase):
         })
         url_map, = self.UrlMap.search([], limit=1)
         en_us, = self.Language.search([('code', '=', 'en_US')])
-        self.site = self.nereid_website_obj.create({
+        self.site = self.Website.create({
             'name': 'localhost',
             'url_map': url_map.id,
             'company': self.company.id,
@@ -120,7 +121,7 @@ class TestLinkedInAuth(NereidTestCase):
         self.templates = {
             'localhost/home.jinja': '{{ get_flashed_messages() }}',
             'localhost/login.jinja':
-                '{{ login_form.errors }} {{ get_flashed_messages() }}'
+            '{{ login_form.errors }} {{ get_flashed_messages() }}'
         }
         return self.templates.get(name)
 
@@ -154,8 +155,8 @@ class TestLinkedInAuth(NereidTestCase):
                 )
                 response = c.get('/')
                 self.assertTrue(
-                    'LinkedIn login is not available at the moment' \
-                    in response.data
+                    'LinkedIn login is not available at the moment' in
+                    response.data
                 )
 
     def test_0020_login(self):
@@ -166,21 +167,21 @@ class TestLinkedInAuth(NereidTestCase):
             self.setup_defaults()
             app = self.get_app()
             self.Website.write([self.site], {
-                'facebook_app_id': get_from_env('LINKEDIN_API_KEY'),
-                'facebook_app_secret': get_from_env('LINKEDIN_API_SECRET'),
+                'linkedin_api_key': get_from_env('LINKEDIN_API_KEY'),
+                'linkedin_api_secret': get_from_env('LINKEDIN_API_SECRET'),
             })
 
             with app.test_client() as c:
                 response = c.get('/en_US/auth/linkedin?next=/en_US')
                 self.assertEqual(response.status_code, 302)
                 self.assertTrue(
-                    'https://api.linkedin.com/uas/oauth/authenticate' in \
+                    'https://api.linkedin.com/uas/oauth/authenticate' in
                     response.data
                 )
 
                 # send the user to the webbrowser and wait for a redirect
                 parser = etree.HTMLParser()
-                tree   = etree.parse(StringIO(response.data), parser)
+                tree = etree.parse(StringIO(response.data), parser)
                 webbrowser.open(tree.xpath('//p/a')[0].values()[0])
 
 
