@@ -28,9 +28,10 @@ class Website:
     linkedin_api_key = fields.Char("LinkedIn API Key")
     linkedin_api_secret = fields.Char("LinkedIn Secret Key")
 
-    def get_linkedin_oauth_client(self,
-            scope='r_basicprofile,r_emailaddress',
-            token='linkedin_oauth_token'):
+    def get_linkedin_oauth_client(
+        self, scope='r_basicprofile,r_emailaddress',
+        token='linkedin_oauth_token'
+    ):
         """Returns a instance of WebCollect
 
         :param scope: Scope of information to be fetched from linkedin
@@ -42,7 +43,8 @@ class Website:
             return None
 
         oauth = OAuth()
-        linkedin = oauth.remote_app('linkedin',
+        linkedin = oauth.remote_app(
+            'linkedin',
             base_url='https://api.linkedin.com',
             request_token_url='/uas/oauth/requestToken',
             access_token_url='/uas/oauth/accessToken',
@@ -72,9 +74,10 @@ class NereidUser:
                 request.referrer or url_for('nereid.website.login')
             )
         return linkedin.authorize(
-            callback = url_for('nereid.user.linkedin_authorized_login',
-                next = request.args.get('next') or request.referrer or None,
-                _external = True
+            callback=url_for(
+                'nereid.user.linkedin_authorized_login',
+                next=request.args.get('next') or request.referrer or None,
+                _external=True
             )
         )
 
@@ -99,16 +102,18 @@ class NereidUser:
             linkedin.free_request_token()
         except Exception, exc:
             current_app.logger.error("LinkedIn login failed %s" % exc)
-            flash(_("We cannot talk to linkedin at this time. Please try again"))
+            flash(_(
+                "We cannot talk to linkedin at this time. Please try again"
+            ))
             return redirect(
                 request.referrer or url_for('nereid.website.login')
             )
 
         if data is None:
-            flash(
-                _("Access was denied to linkedin: %(reason)s",
-                reason=request.args['error_reason'])
-            )
+            flash(_(
+                "Access was denied to linkedin: %(reason)s",
+                reason=request.args['error_reason']
+            ))
             failed_login.send(form=data)
             return redirect(url_for('nereid.website.login'))
 
@@ -158,8 +163,9 @@ class NereidUser:
         session['user'] = user.id
         if not user.linkedin_auth:
             cls.write([user], {'linkedin_auth': True})
-        flash(_("You are now logged in. Welcome %(name)s",
-                    name=user.name))
+        flash(_(
+            "You are now logged in. Welcome %(name)s", name=user.name
+        ))
         login.send()
         if request.is_xhr:
             return 'OK'

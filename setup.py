@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #This file is part of Tryton.  The COPYRIGHT file at the top level of
 #this repository contains the full copyright notices and license terms.
 
@@ -30,7 +31,9 @@ class XMLTests(Command):
     def run(self):
         import coverage
         import xmlrunner
-        cov = coverage.coverage(source=["trytond.modules.nereid_auth_linkedin"])
+        cov = coverage.coverage(
+            source=["trytond.modules.nereid_auth_linkedin"]
+        )
         cov.start()
         from tests import suite
         xmlrunner.XMLTestRunner(output="xml-test-results").run(suite())
@@ -90,16 +93,22 @@ major_version, minor_version, _ = info.get('version', '0.0.1').split('.', 2)
 major_version = int(major_version)
 minor_version = int(minor_version)
 
-requires = ['flask-oauth']
+requires = [
+    'flask-oauth',
+]
 for dep in info.get('depends', []):
     if not re.match(r'(ir|res|webdav)(\W|$)', dep):
-        requires.append('trytond_%s >= %s.%s, < %s.%s' %
+        requires.append(
+            'trytond_%s >= %s.%s, < %s.%s' %
                 (dep, major_version, minor_version, major_version,
-                    minor_version + 1))
+                    minor_version + 1)
+        )
 requires.append('trytond >= %s.%s, < %s.%s' %
-        (major_version, minor_version, major_version, minor_version + 1))
+        (major_version, minor_version, major_version, minor_version + 1)
+)
 
-setup(name='trytond_nereid_auth_linkedin',
+setup(
+    name='trytond_nereid_auth_linkedin',
     version=info.get('version', '0.0.1'),
     description='Nereid User Authentication using LinkedIn',
     author='Openlabs Technologies and Consulting P Ltd.',
@@ -109,11 +118,11 @@ setup(name='trytond_nereid_auth_linkedin',
     packages=[
         'trytond.modules.nereid_auth_linkedin',
         'trytond.modules.nereid_auth_linkedin.tests',
-        ],
+    ],
     package_data={
-        'trytond.modules.nereid_auth_linkedin': info.get('xml', []) \
+        'trytond.modules.nereid_auth_linkedin': info.get('xml', [])
             + ['tryton.cfg'],
-        },
+    },
     classifiers=[
         'Development Status :: 4 - Development',
         'Environment :: Plugins',
@@ -128,7 +137,7 @@ setup(name='trytond_nereid_auth_linkedin',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Topic :: Office/Business',
-        ],
+    ],
     license='GPL-3',
     install_requires=requires,
     zip_safe=False,
@@ -142,4 +151,4 @@ setup(name='trytond_nereid_auth_linkedin',
         'xmltests': XMLTests,
         'audit': RunAudit,
     },
-    )
+)
