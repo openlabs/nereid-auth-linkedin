@@ -12,7 +12,7 @@ from nereid.globals import session, request
 from nereid.signals import login, failed_login
 from flask_oauth import OAuth
 from trytond.model import fields
-from trytond.pool import PoolMeta
+from trytond.pool import PoolMeta, Pool
 
 from .i18n import _
 
@@ -86,6 +86,8 @@ class NereidUser:
         """Authorized handler to which linkedin will redirect the user to
         after the login attempt is made.
         """
+        Party = Pool().get('party.party')
+
         linkedin = request.nereid_website.get_linkedin_oauth_client()
         if linkedin is None:
             return redirect(
@@ -146,13 +148,13 @@ class NereidUser:
                 )
             )
             name = u'%s %s' % (me.data['firstName'], me.data['lastName'])
-            user = cls.create({
-                'name': name,
+            user, = cls.create([{
+                'party': Party.create([{'party': 'name'}])[0].id,
                 'display_name': name,
                 'email': email.data,
                 'linkedin_auth': True,
                 'addresses': False,
-            })
+            }])
             flash(
                 _('Thanks for registering with us using linkedin')
             )
@@ -164,7 +166,7 @@ class NereidUser:
         if not user.linkedin_auth:
             cls.write([user], {'linkedin_auth': True})
         flash(_(
-            "You are now logged in. Welcome %(name)s", name=user.name
+            "You are now logged in. Welcome %(name)s", name=user.rec_name
         ))
         login.send()
         if request.is_xhr:
