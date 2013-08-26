@@ -1,0 +1,16 @@
+language: python
+python:
+  - "2.6"
+  - "2.7"
+install:
+  - pip install flake8
+  - pip install git+git://github.com/openlabs/nereid.git@develop
+  - python setup.py install
+script:
+  - python setup.py test
+  - flake8 .
+notifications:
+  email:
+    - ci-notify@openlabs.co.in
+env:
+  - LINKEDIN_API_KEY=dwgzv26amdf3 LINKEDIN_API_SECRET=CegPGgH2sEnC2fz7
