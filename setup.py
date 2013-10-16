@@ -124,7 +124,7 @@ setup(
             + ['tryton.cfg'],
     },
     classifiers=[
-        'Development Status :: 4 - Development',
+        'Development Status :: 4 - Beta',
         'Environment :: Plugins',
         'Framework :: Tryton',
         'Intended Audience :: Developers',

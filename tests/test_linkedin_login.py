@@ -70,60 +70,62 @@ class TestLinkedInAuth(NereidTestCase):
         "Setup"
         trytond.tests.test_tryton.install_module('nereid_auth_linkedin')
 
+        self.Party = POOL.get('party.party')
         self.Company = POOL.get('company.company')
         self.Currency = POOL.get('currency.currency')
         self.NereidUser = POOL.get('nereid.user')
         self.UrlMap = POOL.get('nereid.url_map')
         self.Language = POOL.get('ir.lang')
         self.Website = POOL.get('nereid.website')
+        self.templates = {
+            'home.jinja': '{{ get_flashed_messages() }}',
+            'login.jinja':
+            '{{ login_form.errors }} {{ get_flashed_messages() }}'
+        }
 
     def setup_defaults(self):
         "Setup defaults"
 
-        usd = self.Currency.create({
+        usd, = self.Currency.create([{
             'name': 'US Dollar',
             'code': 'USD',
             'symbol': '$',
-        })
-        self.company = self.Company.create({
-            'name': 'Openlabs',
+        }])
+        self.company, = self.Company.create([{
+            'party': self.Party.create([{'name': 'Openlabs'}])[0].id,
             'currency': usd.id
-        })
-        self.guest_user = self.NereidUser.create({
+        }])
+
+        guest_user_party, = self.Party.create([{
             'name': 'Guest User',
+        }])
+        self.guest_user, = self.NereidUser.create([{
+            'party': guest_user_party.id,
             'display_name': 'Guest User',
             'email': 'guest@openlabs.co.in',
             'password': 'password',
             'company': self.company.id,
-        })
-        self.registered_user = self.NereidUser.create({
+        }])
+        registered_user_party, = self.Party.create([{
             'name': 'Registered User',
+        }])
+        self.registered_user, = self.NereidUser.create([{
+            'party': registered_user_party.id,
             'display_name': 'Registered User',
             'email': 'email@example.com',
             'password': 'password',
             'company': self.company.id,
-        })
+        }])
         url_map, = self.UrlMap.search([], limit=1)
         en_us, = self.Language.search([('code', '=', 'en_US')])
-        self.site = self.Website.create({
+        self.site, = self.Website.create([{
             'name': 'localhost',
             'url_map': url_map.id,
             'company': self.company.id,
             'application_user': USER,
             'default_language': en_us.id,
             'guest_user': self.guest_user.id,
-        })
-
-    def get_template_source(self, name):
-        """
-        Return templates
-        """
-        self.templates = {
-            'localhost/home.jinja': '{{ get_flashed_messages() }}',
-            'localhost/login.jinja':
-            '{{ login_form.errors }} {{ get_flashed_messages() }}'
-        }
-        return self.templates.get(name)
+        }])
 
     def test_0005_test_view(self):
         """
@@ -153,7 +155,7 @@ class TestLinkedInAuth(NereidTestCase):
                 self.assertTrue(
                     '<a href="/en_US/login">/en_US/login</a>' in response.data
                 )
-                response = c.get('/')
+                response = c.get('/en_US/')
                 self.assertTrue(
                     'LinkedIn login is not available at the moment' in
                     response.data
