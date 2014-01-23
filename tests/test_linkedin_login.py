@@ -77,6 +77,7 @@ class TestLinkedInAuth(NereidTestCase):
         self.UrlMap = POOL.get('nereid.url_map')
         self.Language = POOL.get('ir.lang')
         self.Website = POOL.get('nereid.website')
+        self.WebsiteLocale = POOL.get('nereid.website.locale')
         self.templates = {
             'home.jinja': '{{ get_flashed_messages() }}',
             'login.jinja':
@@ -116,14 +117,19 @@ class TestLinkedInAuth(NereidTestCase):
             'password': 'password',
             'company': self.company.id,
         }])
-        url_map, = self.UrlMap.search([], limit=1)
         en_us, = self.Language.search([('code', '=', 'en_US')])
+        url_map, = self.UrlMap.search([], limit=1)
+        locale, = self.WebsiteLocale.create([{
+            'code': 'en_US',
+            'language': en_us.id,
+            'currency': usd.id,
+        }])
         self.site, = self.Website.create([{
             'name': 'localhost',
             'url_map': url_map.id,
             'company': self.company.id,
             'application_user': USER,
-            'default_language': en_us.id,
+            'default_locale': locale.id,
             'guest_user': self.guest_user.id,
         }])
 
@@ -148,14 +154,14 @@ class TestLinkedInAuth(NereidTestCase):
             app = self.get_app()
 
             with app.test_client() as c:
-                response = c.get('/en_US/auth/linkedin?next=/en_US')
+                response = c.get('/auth/linkedin?next=/')
                 self.assertEqual(response.status_code, 302)
 
                 # Redirect to the home page since
                 self.assertTrue(
-                    '<a href="/en_US/login">/en_US/login</a>' in response.data
+                    '<a href="/login">/login</a>' in response.data
                 )
-                response = c.get('/en_US/')
+                response = c.get('/')
                 self.assertTrue(
                     'LinkedIn login is not available at the moment' in
                     response.data
@@ -174,7 +180,7 @@ class TestLinkedInAuth(NereidTestCase):
             })
 
             with app.test_client() as c:
-                response = c.get('/en_US/auth/linkedin?next=/en_US')
+                response = c.get('/auth/linkedin?next=/')
                 self.assertEqual(response.status_code, 302)
                 self.assertTrue(
                     'https://api.linkedin.com/uas/oauth/authenticate' in
