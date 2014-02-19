@@ -3,7 +3,7 @@
     <data noupdate="1">
     
         <record id="linkedin_authorized_login" model="nereid.url_rule">
-            <field name="rule">/&lt;language&gt;/auth/linkedin_authorized_login</field>
+            <field name="rule">/auth/linkedin_authorized_login</field>
             <field name="endpoint">nereid.user.linkedin_authorized_login</field>
             <field name="sequence" eval="100" />
             <field name="http_method_get" eval="True"/>
@@ -11,7 +11,7 @@
         </record>
     
         <record id="linkedin_login" model="nereid.url_rule">
-            <field name="rule">/&lt;language&gt;/auth/linkedin</field>
+            <field name="rule">/auth/linkedin</field>
             <field name="endpoint">nereid.user.linkedin_login</field>
             <field name="sequence" eval="110" />
             <field name="http_method_get" eval="True"/>
