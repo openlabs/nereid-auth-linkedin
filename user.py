@@ -13,6 +13,7 @@ from nereid.signals import login, failed_login
 from flask_oauth import OAuth
 from trytond.model import fields
 from trytond.pool import PoolMeta, Pool
+from trytond.transaction import Transaction
 
 from .i18n import _
 
@@ -134,26 +135,23 @@ class NereidUser:
         session.pop('linkedin_oauth_token')
 
         # Find the user
-        users = cls.search([
-            ('email', '=', email.data),
-            ('company', '=', request.nereid_website.company.id),
-        ])
+        with Transaction().set_context(active_test=False):
+            users = cls.search([
+                ('email', '=', email.data),
+                ('company', '=', request.nereid_website.company.id),
+            ])
         if not users:
             current_app.logger.debug(
                 "No LinkedIn user with email %s" % email.data
             )
-            current_app.logger.debug(
-                "Registering new user %s %s" % (
-                    me.data['firstName'], me.data['lastName']
-                )
-            )
             name = u'%s %s' % (me.data['firstName'], me.data['lastName'])
+            current_app.logger.debug("Registering new user %s" % name)
             user, = cls.create([{
-                'party': Party.create([{'party': 'name'}])[0].id,
+                'party': Party.create([{'name': name}])[0].id,
                 'display_name': name,
                 'email': email.data,
                 'linkedin_auth': True,
-                'addresses': False,
+                'active': True,
             }])
             flash(
                 _('Thanks for registering with us using linkedin')
