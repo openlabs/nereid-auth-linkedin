@@ -4,10 +4,10 @@
 
     Facebook based user authentication code
 
-    :copyright: (c) 2012-2013 by Openlabs Technologies & Consulting (P) LTD
+    :copyright: (c) 2012-2014 by Openlabs Technologies & Consulting (P) LTD
     :license: GPLv3, see LICENSE for more details.
 """
-from nereid import url_for, flash, redirect, current_app
+from nereid import url_for, flash, redirect, current_app, route
 from nereid.globals import session, request
 from nereid.signals import login, failed_login
 from flask_oauth import OAuth
@@ -65,6 +65,7 @@ class NereidUser:
     linkedin_auth = fields.Boolean('LinkedIn Auth')
 
     @classmethod
+    @route("/auth/linkedin", methods=["GET"])
     def linkedin_login(cls):
         """The URL to which a new request to authenticate to linedin begins
         Usually issues a redirect.
@@ -83,6 +84,7 @@ class NereidUser:
         )
 
     @classmethod
+    @route("/auth/linkedin_authorized_login", methods=["GET"])
     def linkedin_authorized_login(cls):
         """Authorized handler to which linkedin will redirect the user to
         after the login attempt is made.

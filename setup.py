@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#This file is part of Tryton.  The COPYRIGHT file at the top level of
-#this repository contains the full copyright notices and license terms.
+# This file is part of Tryton.  The COPYRIGHT file at the top level of
+# this repository contains the full copyright notices and license terms.
 
 from setuptools import setup, Command
 import re
@@ -95,13 +95,15 @@ minor_version = int(minor_version)
 
 requires = [
     'flask-oauth',
+    'trytond_nereid>=3.0.7.0, <3.1',
 ]
 for dep in info.get('depends', []):
     if not re.match(r'(ir|res|webdav)(\W|$)', dep):
         requires.append(
-            'trytond_%s >= %s.%s, < %s.%s' %
-                (dep, major_version, minor_version, major_version,
-                    minor_version + 1)
+            'trytond_%s >= %s.%s, < %s.%s' % (
+                dep, major_version, minor_version, major_version,
+                minor_version + 1
+            )
         )
 requires.append('trytond >= %s.%s, < %s.%s' %
         (major_version, minor_version, major_version, minor_version + 1)
@@ -120,8 +122,8 @@ setup(
         'trytond.modules.nereid_auth_linkedin.tests',
     ],
     package_data={
-        'trytond.modules.nereid_auth_linkedin': info.get('xml', [])
-            + ['tryton.cfg'],
+        'trytond.modules.nereid_auth_linkedin':
+            info.get('xml', []) + ['tryton.cfg'],
     },
     classifiers=[
         'Development Status :: 4 - Beta',
