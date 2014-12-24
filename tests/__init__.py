@@ -7,5 +7,5 @@
     :license: GPLv3, see LICENSE for more details
 
 '''
-#Flake8: noqa
+# flake8: noqa
 from test_linkedin_login import suite

@@ -97,16 +97,6 @@ class TestLinkedInAuth(NereidTestCase):
             'currency': usd.id
         }])
 
-        guest_user_party, = self.Party.create([{
-            'name': 'Guest User',
-        }])
-        self.guest_user, = self.NereidUser.create([{
-            'party': guest_user_party.id,
-            'display_name': 'Guest User',
-            'email': 'guest@openlabs.co.in',
-            'password': 'password',
-            'company': self.company.id,
-        }])
         registered_user_party, = self.Party.create([{
             'name': 'Registered User',
         }])
@@ -130,7 +120,6 @@ class TestLinkedInAuth(NereidTestCase):
             'company': self.company.id,
             'application_user': USER,
             'default_locale': locale.id,
-            'guest_user': self.guest_user.id,
         }])
 
     def test_0005_test_view(self):
