@@ -1,15 +1,11 @@
 language: python
 python:
-  - "2.6"
-  - "2.7"
-install:
-  - pip install flake8
-  - python setup.py install
+  - 2.7
 script:
-  - python setup.py test
-  - flake8 .
+  - make test-sqlite
+  - make test-flake8
 notifications:
   email:
-    - ci-notify@openlabs.co.in
+  - ci-notify@openlabs.co.in
 env:
   - LINKEDIN_API_KEY=dwgzv26amdf3 LINKEDIN_API_SECRET=CegPGgH2sEnC2fz7

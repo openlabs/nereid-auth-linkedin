@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<data>
+    <xpath expr="/form/notebook" position="inside">
+        <page string="Linkedin Configuration" id="linkedin">
+          <label name="linkedin_api_key" />
+          <field name="linkedin_api_key" />
+          <label name="linkedin_api_secret" />
+          <field name="linkedin_api_secret" />
+        </page>
+    </xpath>
+</data>
+
