@@ -4,7 +4,7 @@
 
     Test the linkedin login
 
-    :copyright: (c) 2012-2013 by Openlabs Technologies & Consulting (P) LTD
+    :copyright: (c) 2012-2015 by Openlabs Technologies & Consulting (P) LTD
     :license: GPLv3, see LICENSE for more details.
 """
 import os
@@ -74,7 +74,6 @@ class TestLinkedInAuth(NereidTestCase):
         self.Company = POOL.get('company.company')
         self.Currency = POOL.get('currency.currency')
         self.NereidUser = POOL.get('nereid.user')
-        self.UrlMap = POOL.get('nereid.url_map')
         self.Language = POOL.get('ir.lang')
         self.Website = POOL.get('nereid.website')
         self.WebsiteLocale = POOL.get('nereid.website.locale')
@@ -108,7 +107,6 @@ class TestLinkedInAuth(NereidTestCase):
             'company': self.company.id,
         }])
         en_us, = self.Language.search([('code', '=', 'en_US')])
-        url_map, = self.UrlMap.search([], limit=1)
         locale, = self.WebsiteLocale.create([{
             'code': 'en_US',
             'language': en_us.id,
@@ -116,7 +114,6 @@ class TestLinkedInAuth(NereidTestCase):
         }])
         self.site, = self.Website.create([{
             'name': 'localhost',
-            'url_map': url_map.id,
             'company': self.company.id,
             'application_user': USER,
             'default_locale': locale.id,
